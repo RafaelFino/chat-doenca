@@ -1,0 +1,4 @@
+flask
+db-sqlite3
+loguru
+cryptography
