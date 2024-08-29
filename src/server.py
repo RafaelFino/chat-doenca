@@ -70,7 +70,6 @@ def get_messages(last = 0):
             last = len(messages) - 1
         
         for m in messages[last:]:
-            logger.info(m.ToStr())
             ret.append(m.ToJson())
         
         logger.info(f"Returning messages from {last}: {ret}")
