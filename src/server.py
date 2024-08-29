@@ -39,25 +39,51 @@ def index():
     return 'Chat Doenca API'
 
 @app.route('/message', methods=['POST'])
-def post_message():    
-    sender = request.form.get('sender')
-    text = request.form.get('text')
-    message = Message(len(messages), sender, text)
-    messages.append(message)
+def post_message():
+    try:
+        sender = request.form.get('sender')
+        text = request.form.get('text')
+        message = Message(len(messages), sender, text)
+        messages.append(message)
 
-    logger.info('Received message: {message.ToStr()}')
+        logger.info(f'Received message: {message.ToStr()}')
 
-    return { "message-id": message.id } 
+        return { 
+            "id": message.id,
+            "timestamp": datetime.datetime.now().isoformat()
+            }, 201
+    except Exception as e:
+        logger.error(f'Error processing message: {e}')
+        return { 
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+            }, 500
 
 @app.route('/message/<last>', methods=['GET'])
 def get_messages(last = 0):
-    ret = []
-    for m in messages:
-        logger.info(m.ToStr())
-        ret.append(m.ToJson())
-    
-    logger.info('Returning messages from {last}: {len(ret)}')
-    return { "messages": ret }
+    try:
+        ret = []
+        if last < 0:
+            last = 0
+
+        if last >= len(messages):
+            last = len(messages) - 1
+        
+        for m in messages[last:]:
+            logger.info(m.ToStr())
+            ret.append(m.ToJson())
+        
+        logger.info(f"Returning messages from {last}: {ret}")
+        return { 
+            "messages": ret,
+            "timestamp": datetime.datetime.now().isoformat()
+            }, 200
+    except Exception as e:
+        logger.error(f'Error processing message: {e}')
+        return { 
+            "error": str(e),
+            "timestamp": datetime.datetime.now().isoformat()
+            }, 500
 
 if __name__ == '__main__':
     logger.info('Starting Chat Doenca API')
