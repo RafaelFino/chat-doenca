@@ -72,7 +72,7 @@ def get_messages(last = 0):
         for m in messages[last:]:
             ret.append(m.ToJson())
         
-        logger.info(f"Returning messages from {last}: {ret}")
+        logger.info(f"Returning {len(ret)} messages messages from {last}")
         return { 
             "messages": ret,
             "timestamp": datetime.datetime.now().isoformat()
