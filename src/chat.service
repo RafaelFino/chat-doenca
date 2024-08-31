@@ -1,0 +1,13 @@
+[Unit]
+Description=Chat Doeanca Service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=30
+User=root
+ExecStart=/srv/chat-doenca/start.sh
+
+[Install]
+WantedBy=multi-user.target

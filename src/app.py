@@ -43,6 +43,21 @@ def post_message():
     try:
         sender = request.form.get('sender')
         text = request.form.get('text')
+
+        if sender is None or len(sender) == 0:
+            logger.error("Sender is empty")
+            return {
+                "error": "Empty sender",
+                "timestamp": datetime.datetime.now().isoformat()
+            }, 400
+
+        if text is None or len(text) == 0:
+            logger.error("Text is empty")
+            return {
+                "error": "Empty text",
+                "timestamp": datetime.datetime.now().isoformat()
+            }, 400
+
         message = Message(len(messages), sender, text)
         messages.append(message)
 
@@ -60,9 +75,15 @@ def post_message():
             }, 500
 
 @app.route('/message/<last>', methods=['GET'])
-def get_messages(last = 0):
+def get_messages(last: int = 0):
     try:
         ret = []
+        if not last.isdigit():
+            return {
+                "error": "Invalid message index",
+                "timestamp": datetime.datetime.now().isoformat()
+            }, 400
+        last = int(last)
         if last < 0:
             last = 0
 
@@ -72,7 +93,7 @@ def get_messages(last = 0):
         for m in messages[last:]:
             ret.append(m.ToJson())
         
-        logger.info(f"Returning {len(ret)} messages messages from {last}")
+        logger.info(f"Returning {len(ret)} messages messages from {last}: {ret}")
         return { 
             "messages": ret,
             "timestamp": datetime.datetime.now().isoformat()
@@ -84,7 +105,11 @@ def get_messages(last = 0):
             "timestamp": datetime.datetime.now().isoformat()
             }, 500
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
+def start_app():
     logger.info('Starting Chat Doenca API')
-    app.run(port=8080, debug=True)
+    from waitress import serve
+    serve(app, host="192.168.1.9", port=8080)    
     logger.info('Exiting Chat Doenca API')
+
+    
