@@ -23,7 +23,7 @@ class Message:
 
     def ToStr(self):
         return f'[{self.id:06}] {self.when} {self.sender} -> {self.text}'
-    
+
     def ToJson(self):
         return {
             'id': self.id,
@@ -63,13 +63,13 @@ def post_message():
 
         logger.info(f'Received message: {message.ToStr()}')
 
-        return { 
+        return {
             "id": message.id,
             "timestamp": datetime.datetime.now().isoformat()
             }, 201
     except Exception as e:
         logger.error(f'Error processing message: {e}')
-        return { 
+        return {
             "error": str(e),
             "timestamp": datetime.datetime.now().isoformat()
             }, 500
@@ -88,28 +88,28 @@ def get_messages(last: int = 0):
             last = 0
 
         if last >= len(messages):
-            last = len(messages) - 1
-        
-        for m in messages[last:]:
+            return {
+                "messages": ret,
+                "timestamp": datetime.datetime.now().isoformat()
+                }, 200
+
+        for m in messages[last+1:]:
             ret.append(m.ToJson())
-        
+
         logger.info(f"Returning {len(ret)} messages messages from {last}: {ret}")
-        return { 
+        return {
             "messages": ret,
             "timestamp": datetime.datetime.now().isoformat()
             }, 200
     except Exception as e:
         logger.error(f'Error processing message: {e}')
-        return { 
+        return {
             "error": str(e),
             "timestamp": datetime.datetime.now().isoformat()
             }, 500
 
-#if __name__ == '__main__':
 def start_app():
     logger.info('Starting Chat Doenca API')
     from waitress import serve
-    serve(app, host="192.168.1.9", port=8080)    
+    serve(app, host="192.168.1.9", port=8080)
     logger.info('Exiting Chat Doenca API')
-
-    
