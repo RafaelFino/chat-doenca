@@ -3,6 +3,7 @@
 from flask import Flask, request, make_response
 from flask_cors import CORS
 from loguru import logger
+import sqlite3
 import logging
 import datetime
 import json
@@ -17,24 +18,53 @@ CORS(app)
 app.logger.addHandler(InterceptHandler())
 
 class Message:
-    def __init__(self, id: int, sender: str, text: str):
+    def __init__(self, sender: str, text: str):
         self.id = id
-        self.when = datetime.datetime.now().isoformat()
+        self.timestamp = datetime.datetime.now().isoformat()
         self.sender = sender
         self.text = text
 
     def ToStr(self):
-        return f'[{self.id:06}] {self.when} {self.sender} -> {self.text}'
+        return f'[{self.id:06}] {self.timestamp} {self.sender} -> {self.text}'
 
     def ToJson(self):
         return {
             'id': self.id,
-            'when': self.when,
+            'timestamp': self.timestamp,
             'sender': self.sender,
             'text': self.text
         }
+    
+class Storage:
+    def __init__(self):
+        self.db = sqlite3.connect('chat.db', check_same_thread=False)
+        c = self.db.cursor()
+        c.execute('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, sender TEXT, text TEXT)')
+        self.db.commit()
 
-messages = []
+    def add_message(self, message: Message) -> int:
+        c = self.db.cursor()
+        c.execute('INSERT INTO messages (timestamp, sender, text) VALUES (?, ?, ?)', (message.timestamp, message.sender, message.text))
+        self.db.commit()
+        c.close()
+        return c.lastrowid
+
+    def get_messages(self, last: int):
+        c = self.db.cursor()
+        c.execute('SELECT * FROM messages WHERE id >= ? order by id', (last,))
+        ret = []
+
+        for row in c.fetchall():
+            m = Message(row[2], row[3])
+            m.id = row[0]
+            m.timestamp = row[1]
+            ret.append(m)
+
+        c.close()
+        return ret
+    
+storage = Storage()
+
 headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
@@ -53,7 +83,7 @@ def index():
         let lastMessageId = 0; // ID da última mensagem recebida
 
         async function fetchMessages() {            
-            let url = `http://192.168.1.9:8080/message/${lastMessageId}`;            
+            let url = `http://0.0.0.0:8080/message/${lastMessageId}`;            
 
             console.log('Buscando mensagens:', url);
 
@@ -87,13 +117,13 @@ def index():
             data.forEach(item => {
                 const row = document.createElement('tr');
 
-                const whenCell = document.createElement('td');
-                whenCell.textContent = item.when;
-                row.appendChild(whenCell);
-
                 const idCell = document.createElement('td');
                 idCell.textContent = item.id;
                 row.appendChild(idCell);
+
+                const whenCell = document.createElement('td');
+                whenCell.textContent = item.timestamp;
+                row.appendChild(whenCell);                
 
                 const senderCell = document.createElement('td');
                 senderCell.textContent = item.sender;
@@ -119,14 +149,15 @@ def index():
 
             console.log('Enviando mensagem:', sender, text);
 
-            fetch('http://192.168.1.9:8080/message', {
+            fetch('http://0.0.0.0:8080/message', {
                 method: 'POST',
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
                 console.log('Sucesso:', data);
-                document.getElementById('messageForm').reset(); // Reseta o formulário após o envio
+                //document.getElementById('messageForm').reset(); // Reseta o formulário após o envio
+                document.getElementById('text').value = ''; // Limpa apenas o campo de texto
                 fetchMessages(); // Atualiza a tabela imediatamente após enviar a mensagem
             })
             .catch(error => console.error('Erro:', error));
@@ -155,11 +186,11 @@ def index():
 
     <!-- Tabela para exibir as mensagens -->
     <h2>Mensagens:</h2>
-    <table border="1">
+    <table border="1" style="width: 100%">
         <thead>
             <tr>
-                <th>Data</th>
                 <th>ID</th>
+                <th>Data</th>                
                 <th>Nome</th>
                 <th>Mensagem</th>
             </tr>
@@ -199,9 +230,9 @@ def post_message():
                 "error": "Empty text"                
             }, 400)
 
-        message = Message(len(messages), sender, text)
-        messages.append(message)
-
+        message = Message(sender, text)
+        message.id = storage.add_message(message)
+        
         logger.info(f'Received message: {message.ToStr()}')
 
         return resp({
@@ -226,18 +257,14 @@ def get_messages(last: int = 0):
         if last < 0:
             last = 0
 
-        if last >= len(messages):
-            return resp({
-                "messages": ret
-                }, 200)
-
-        for m in messages[last:]:
+        for m in storage.get_messages(last):
             ret.append(m.ToJson())
 
         logger.info(f"Returning {len(ret)} messages messages from {last}: {ret}")
         return resp({
             "messages": ret
             }, 200)
+    
     except Exception as e:
         logger.error(f'Error processing message: {e}')
         return resp({
@@ -247,5 +274,5 @@ def get_messages(last: int = 0):
 def start_app():
     logger.info('Starting Chat Doenca API')
     from waitress import serve
-    serve(app, host='192.168.1.9' port=8080)
+    serve(app, port=8080)
     logger.info('Exiting Chat Doenca API')
