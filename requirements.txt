@@ -1,4 +1,4 @@
 flask
-db-sqlite3
+flask-cors
 loguru
-cryptography
+waitress
