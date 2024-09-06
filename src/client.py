@@ -1,7 +1,6 @@
 #! /bin/env python3
 
 import requests
-import json
 import threading
 import time
 
@@ -35,7 +34,7 @@ class receiver(threading.Thread):
                 id = int(message['id'])
                 if id >= self.last:
                     print(f">> [{message['when']}] {message['sender']}: {message['text']}")
-                    self.last = int(message['id'])
+                    self.last = int(message['id']) + 1
 
     def run(self, *args, **kwargs):
         self.last = 0
