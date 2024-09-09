@@ -3,6 +3,7 @@
 from flask import Flask, request, make_response
 from flask_cors import CORS
 from loguru import logger
+from waitress import serve
 from storage import Storage
 from message import Message
 import sqlite3
@@ -110,24 +111,45 @@ def get_message(id: int):
 def get_messages():
     try:
         ret = []
-        last = request.args.get('last', '0')
-
-        if not last.isdigit():
-            return resp({
-                "error": "Invalid message index"
-            }, 400)
         
-        last = int(last)
-        if last < 0:
-            last = 0
+        sender = request.args.get('sender', None)
+        if sender is not None:
+            for m in storage.get_messages_from(sender):
+                ret.append(m.ToJson())
 
-        for m in storage.get_messages(last):
-            ret.append(m.ToJson())
+            if len(ret) == 0:
+                return resp({
+                    "error": "No messages found"
+                }, 404)
 
-        logger.info(f"Returning {len(ret)} messages messages from {last}: {ret}")
+            logger.info(f"Returning {len(ret)} messages from {sender}: {ret}")
+            return resp({
+                "messages": ret
+                }, 200)
+
+        last = request.args.get('last', None)        
+        if last is not None:
+            if not last.isdigit():
+                return resp({
+                    "error": "Invalid message index"
+                }, 400)
+            
+            last = int(last)
+            if last < 0:
+                last = 0
+
+            for m in storage.get_messages(last):
+                ret.append(m.ToJson())
+
+            logger.info(f"Returning {len(ret)} messages messages from id {last}: {ret}")
+            return resp({
+                "messages": ret
+                }, 200)
+        
+        logger.Error("No parameters found")
         return resp({
-            "messages": ret
-            }, 200)
+            "error": "No parameters found"
+            }, 400)
     
     except Exception as e:
         logger.error(f'Error processing message: {e}')
@@ -136,7 +158,6 @@ def get_messages():
             }, 500)
 
 def start_app():
-    logger.info('Starting Chat Doenca API')
-    from waitress import serve
-    serve(app, port=8081)
+    logger.info('Starting Chat Doenca API')    
+    serve(app, host='server', port=8081)
     logger.info('Exiting Chat Doenca API')
