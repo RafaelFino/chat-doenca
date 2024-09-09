@@ -23,7 +23,7 @@ class receiver(threading.Thread):
         self.sender = sender
 
     def get_messages(self):
-        url = f"{server_url}/message/{self.last}"
+        url = f"{server_url}/messages/?last={self.last}"
         response = requests.get(url)
         if response.status_code != 200:
             print('Failed to get messages')
