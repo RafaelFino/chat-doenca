@@ -114,7 +114,7 @@ def get_messages():
         sender = request.args.get('sender')                
         last = request.args.get('last')        
         logger.info(f"Sender: {sender} // Last: {last}")
-        
+
         if sender is not None:                      
             for m in storage.get_messages_from(sender):
                 ret.append(m.ToJson())
@@ -161,5 +161,5 @@ def get_messages():
 
 def start_app():
     logger.info('Starting Chat Doenca API')    
-    serve(app, host='localhost', port=8081)
+    serve(app, host='0.0.0.0', port=8081)
     logger.info('Exiting Chat Doenca API')
