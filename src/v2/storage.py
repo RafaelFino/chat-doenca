@@ -5,6 +5,7 @@ class Storage:
     def __init__(self):
         self.db = sqlite3.connect('chat.db', check_same_thread=False)
         c = self.db.cursor()
+
         c.execute('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, sender TEXT, text TEXT)')
         self.db.commit()
 
@@ -41,3 +42,17 @@ class Storage:
 
         c.close()
         return ret
+    
+    def get_messages_from(self, sender: str):
+        c = self.db.cursor()
+        c.execute("""SELECT id, timestamp, sender, text FROM messages WHERE upper(sender) like ? order by id""", (f"%{sender.upper()}%",))
+        ret = []
+
+        for row in c.fetchall():
+            m = Message(row[2], row[3])
+            m.id = row[0]
+            m.timestamp = row[1]
+            ret.append(m)
+
+        c.close()
+        return ret    

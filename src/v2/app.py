@@ -16,6 +16,7 @@ class InterceptHandler(logging.Handler):
         logger_opt = logger.opt(depth=6, exception=record.exc_info)
         logger_opt.log(record.levelno, record.getMessage())
 
+root = ""
 app = Flask(__name__)
 CORS(app) 
 app.logger.addHandler(InterceptHandler())
@@ -27,14 +28,13 @@ headers = {
     'Access-Control-Allow-Origin': '*'
 }
 
-home = None
-
 @app.route('/')
 def index():
-    if home is None:
-        with open('index.html') as f:
-            home = f.read()
-    return home
+    root = ""
+    with open('index.html') as f:
+        root = f.read()
+    
+    return root
 
 def resp(body: dict, status_code):
     body['timestamp'] = datetime.datetime.now().isoformat()
@@ -107,13 +107,15 @@ def get_message(id: int):
             "error": str(e)
             }, 500)    
 
-@app.route('/messages/', methods=['GET'])
+@app.route('/message', methods=['GET'])
 def get_messages():
     try:
-        ret = []
+        ret = []        
+        sender = request.args.get('sender')                
+        last = request.args.get('last')        
+        logger.info(f"Sender: {sender} // Last: {last}")
         
-        sender = request.args.get('sender', None)
-        if sender is not None:
+        if sender is not None:                      
             for m in storage.get_messages_from(sender):
                 ret.append(m.ToJson())
 
@@ -126,9 +128,9 @@ def get_messages():
             return resp({
                 "messages": ret
                 }, 200)
-
-        last = request.args.get('last', None)        
-        if last is not None:
+        
+        if last is not None:            
+            logger.info(f"Last: {last}")
             if not last.isdigit():
                 return resp({
                     "error": "Invalid message index"
@@ -146,7 +148,7 @@ def get_messages():
                 "messages": ret
                 }, 200)
         
-        logger.Error("No parameters found")
+        logger.error("No parameters found")
         return resp({
             "error": "No parameters found"
             }, 400)
@@ -159,5 +161,5 @@ def get_messages():
 
 def start_app():
     logger.info('Starting Chat Doenca API')    
-    serve(app, host='server', port=8081)
+    serve(app, host='localhost', port=8081)
     logger.info('Exiting Chat Doenca API')
