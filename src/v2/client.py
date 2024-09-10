@@ -4,7 +4,7 @@ import requests
 import threading
 import time
 
-server_url = "http://192.168.1.9:8080"
+server_url = "http://192.168.1.9:8081"
 
 def post_message(sender: str, text: str) -> int:
     url = f"{server_url}/message"
