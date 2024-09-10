@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script>
+        let lastMessageId = 0; // ID da última mensagem recebida
+
+        async function fetchMessages() {            
+            let url = `http://server:8081/messages/?last=${lastMessageId}`;
+
+            resp = await fetch(url, {
+                method: 'GET',                
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log(resp);
+
+            txt = await resp.text();
+
+            console.log(txt);
+
+            data = await JSON.parse(txt);
+
+            const messages = data.messages;
+
+            if (messages.length > 0) {
+                updateTable(messages);
+                lastMessageId = messages[messages.length-1].id + 1;
+                console.log('Última mensagem:', lastMessageId);
+            }            
+        }
+
+        function updateTable(data) {
+            const tableBody = document.getElementById('messagesTableBody');
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+
+                const idCell = document.createElement('td');
+                idCell.textContent = item.id;
+                row.appendChild(idCell);
+
+                const whenCell = document.createElement('td');
+                whenCell.textContent = item.timestamp;
+                row.appendChild(whenCell);                
+
+                const senderCell = document.createElement('td');
+                senderCell.textContent = item.sender;
+                row.appendChild(senderCell);
+
+                const textCell = document.createElement('td');
+                textCell.textContent = item.text;
+                row.appendChild(textCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function sendMessage(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            
+            const formData = new FormData();
+            const sender = document.getElementById('sender').value;
+            const text = document.getElementById('text').value;
+            
+            formData.append("sender", sender);
+            formData.append("text", text);
+
+            console.log('Enviando mensagem:', sender, text);
+
+            fetch('http://ser:8081/message', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Sucesso:', data);
+                //document.getElementById('messageForm').reset(); // Reseta o formulário após o envio
+                document.getElementById('text').value = ''; // Limpa apenas o campo de texto
+                fetchMessages(); // Atualiza a tabela imediatamente após enviar a mensagem
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+
+        // Iniciar o request GET a cada 5 segundos
+        setInterval(fetchMessages, 5000);
+
+        // Fazer o primeiro request imediatamente após a página carregar
+        window.onload = fetchMessages;
+    </script>
+</head>
+<body>
+    <h1>Chat</h1>
+
+    <!-- Formulário para enviar mensagens -->
+    <form id="messageForm" onsubmit="sendMessage(event)">
+        <label for="sender">Nome:</label>
+        <input type="text" id="sender" name="sender" required>
+        
+        <label for="text">Mensagem:</label>
+        <input type="text" id="text" name="text" required>
+        
+        <button type="submit">Enviar</button>
+    </form>
+
+    <!-- Tabela para exibir as mensagens -->
+    <h2>Mensagens:</h2>
+    <table border="1" style="width: 100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>                
+                <th>Nome</th>
+                <th>Mensagem</th>
+            </tr>
+        </thead>
+        <tbody id="messagesTableBody">
+            <!-- Linhas da tabela serão adicionadas aqui dinamicamente -->
+        </tbody>
+    </table>
+</body>
+</html>
