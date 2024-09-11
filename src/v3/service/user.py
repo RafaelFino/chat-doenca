@@ -4,11 +4,11 @@ from storage.user import UserStorage
 
 class UserService:
     def __init__(self, storage: UserStorage):
+        logger.debug('UserService created')
         self.storage = storage
 
     def get(self, id: int) -> User:
         try:
-            logger.info(f'Getting user {id}')
             return self.storage.get(id)
         except Exception as e:
             logger.error(f'Error getting user: {e}')

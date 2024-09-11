@@ -6,3 +6,6 @@ class Storage:
 
     def get_cursor(self):
         return self.db.cursor()
+    
+    def commit(self):
+        self.db.commit()

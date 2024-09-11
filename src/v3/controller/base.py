@@ -1,66 +1,84 @@
-import datetime
+from flask import make_response
 from loguru import logger
-from storage import Storage
-from storage.user import UserStorage
-from storage.message import MessageStorage
 from service.auth import AuthService
-from service.user import UserService
 from service.message import MessageService
+from service.user import UserService
+from storage.storage import Storage
+from storage.message import MessageStorage
+from storage.user import UserStorage
+from domain.token import Token
+import datetime
+import json
 
-class Services(type):
+class Services():
     _storage = Storage()
-    _userStorage = UserStorage(_storage)
-    _messageStorage = MessageStorage(_storage)
-    _userService = UserService(_userStorage)
-    _authService = AuthService(_userStorage)
-    _messageService = MessageService(_messageStorage)
+    _user_storage = UserStorage(_storage)
+    _message_storage = MessageStorage(_storage)
+    _user_service = UserService(_user_storage)
+    _auth_service = AuthService(_user_storage)
+    _message_service = MessageService(_message_storage)
 
     def user_service(self) -> UserService:
-        return self._userService
+        return self._user_service
     
     def auth_service(self) -> AuthService:
-        return self._authService
+        return self._auth_service
     
     def message_service(self) -> MessageService:
-        return self._messageService
+        return self._message_service
     
-    def auth(self, request: any) -> int:
+    def auth(self, request: any) -> Token:
         try:
             token = request.headers.get('Authorization')
             if token is None or len(token) == 0:
-                return None          
+                return None            
 
-            id = self._auth_service.check(token)
+            result = self._auth_service.check(token)
 
-            if id is None:
-                return None
+            if result is None:
+                logger.error('Token not found')
+                return None            
             
-            return id
+            return result
         
         except Exception as e:
             logger.error(f'Error checking token: {e}')
             return None
 
+services = Services()
+
+headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+}
+
 class Response:
     @staticmethod
-    def create_response(status: int, message: str, data: dict = None):        
-        ret = {        
-            "message": message,
-            "timestamp": datetime.now().isoformat()
-        }
+    def create_response(status: int, message: str, body: dict = None):        
+        if body is None:
+            body = {}
 
-        if data is not None:
-            for key in data:
-                ret[key] = data[key]
+        body['timestamp'] = datetime.datetime.now().isoformat()
+        body['message'] = message
+        ret = make_response(json.dumps(body))
+        ret.headers = headers
+        ret.status_code = status                
 
-        logger.info(f'Response {status}: {ret}')                
+        logger.info(f'Response {status}: {json.dumps(body)}')                
 
-        return ret, status
+        return ret
     
     @staticmethod
-    def create_error_response(status: int, error: str):
-        logger.error(f'Error {status}: {error}')
-        return {
-            "error": error,
-            "timestamp": datetime.now().isoformat()
-        }, status
+    def create_error_response(status: int, error: str, message : str = None):
+        body = {}
+        body['timestamp'] = datetime.datetime.now().isoformat()
+        body['error'] = error
+        if message is not None:
+            body['message'] = message
+        ret = make_response(json.dumps(body))
+        ret.headers = headers
+        ret.status_code = status 
+
+        logger.error(f'Error response {status}: {json.dumps(body)}')  
+
+        return ret

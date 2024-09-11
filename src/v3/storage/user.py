@@ -1,17 +1,17 @@
 from domain.user import User
+from loguru import logger
 import hashlib
 
 class UserStorage:
     def __init__(self, storage):
         self.storage = storage
         c = self.storage.get_cursor()
-        c.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)')
-        c.commit()
+        c.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, password TEXT NOT NULL);')
         c.close()
 
     def get(self, id: int) -> User:
         c = self.storage.get_cursor()
-        c.execute('SELECT id, username FROM users WHERE id = ?', (id,))
+        c.execute('SELECT id, name FROM users WHERE id = ?;', (id,))
         u = None
 
         for row in c.fetchall():
@@ -20,19 +20,29 @@ class UserStorage:
         c.close()
         return u
     
-    def create(self, name: str, password: str) -> int:
-        c = self.storage.get_cursor()
-        hidden = hashlib.sha256(password.encode()).hexdigest()
-        c.execute('INSERT INTO users (username, password) VALUES (?, ?)', (name, password))
-        c.commit()
-        c.close()
+    def create(self, name: str, password: str) -> int:        
+        try:
+            hidden = hashlib.sha256(password.encode()).hexdigest()
+            c = self.storage.get_cursor()
+            c.execute('INSERT INTO users (name, password) VALUES (?, ?);', (name, hidden))
+            self.storage.commit()
+            c.close()
+        except Exception as e:
+            logger.error(f'Error creating user: {e}')
+            return None
+       
         return c.lastrowid
 
     def auth(self, id: int, password: str) -> bool:
-        c = self.storage.get_cursor()
-        hidden = hashlib.sha256(password.encode()).hexdigest()
-        c.execute('SELECT id FROM users WHERE id = ? AND password = ?', (id, hidden))
-        r = c.fetchone()
-        c.close()
-        return r is not None
+        try:
+            hidden = hashlib.sha256(password.encode()).hexdigest()
+            c = self.storage.get_cursor()
+            c.execute('SELECT id FROM users WHERE id = ? AND password = ?;', (id, hidden))
+            r = c.fetchone()
+            c.close()
+            
+            return r is not None
+        except Exception as e:
+            logger.error(f'Error authenticating user: {e}')
+            return False
         

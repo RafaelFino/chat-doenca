@@ -1,6 +1,6 @@
 flask
 flask-requests
 flask-cors
+flask-restx
 loguru
-waitress
 db-sqlite3
