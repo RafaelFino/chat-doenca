@@ -26,7 +26,7 @@ class AuthController(Resource):
             if password is None or len(password) == 0:
                 return Response.create_error_response(400, 'Empty password')
             
-            token = self.auth_service.login(id, password)
+            token = services.auth_service.login(id, password)
             return Response.create_response(201, 'User login', {'token': token})
                         
         except Exception as e:
@@ -36,9 +36,9 @@ class AuthController(Resource):
     def delete(self, id: int):
         try:
             if id is None or len(id) == 0:
-                return self.create_error_response(400, 'Empty id')
+                return Response.create_error_response(400, 'Empty id')
                                     
-            if self.auth_service.logout(id):
+            if services.auth_service.logout(id):
                 return Response.create_response(201, 'User logout', {'result': True})
             else:
                 return Response.create_error_response(404, 'User not found')
