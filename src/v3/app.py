@@ -39,6 +39,6 @@ def index():
 
 if __name__ == '__main__':
     logger.info('Starting Chat Doenca API')    
-    SERVER_HOST = environ.get('SERVER_HOST', 'localhost')
+    SERVER_HOST = environ.get('SERVER_HOST_CHAT_V3', 'localhost')
     app.run(host=SERVER_HOST, port=8082, threaded=True)
     logger.info('Exiting Chat Doenca API')
