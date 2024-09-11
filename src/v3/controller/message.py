@@ -57,7 +57,7 @@ class MessageController(Resource):
             return Response.create_error_response(500, str(e))
         
     @api.doc(params={'Authorization': {'in': 'header', 'description': 'Authorization token'}})
-    @api.param('last','Last message id')
+    @api.param('last','Last message id', required=False)
     def get(self):
         try:
             token = services.auth(request)
@@ -79,7 +79,7 @@ class MessageController(Resource):
             if user_id is None:
                 return Response.create_error_response(401, 'Unauthorized')
             
-            last = request.args.get('last')
+            last = request.args.get('last', default = 0, type = int)
             
             m = services.message_service().get_from_last(last)
             if m is None:
