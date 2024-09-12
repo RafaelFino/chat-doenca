@@ -49,7 +49,7 @@ class UserStorage:
         try:
             hidden = hashlib.sha256(password.encode()).hexdigest()
             c = self.storage.get_cursor()
-            c.execute('SELECT id FROM users WHERE id = ? AND password = ? AND enabled = 1;', (id, hidden))
+            c.execute('SELECT id FROM users WHERE id = ? AND password = ? AND enable = 1;', (id, hidden))
             r = c.fetchone()
             c.close()
             
