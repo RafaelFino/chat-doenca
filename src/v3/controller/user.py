@@ -94,13 +94,12 @@ class UserIdController(Resource):
             
             enable = request.json.get('enable')
             if enable is None:
-                return Response.create_error_response(400, 'Empty enable')
+                return Response.create_error_response(400, 'Empty enable field')
             
-            ret = services.user_service().put(id, enable)
-            if ret:
-                return Response.create_response(200, 'User updated')
-            else:
+            if not services.user_service().put(id, enable):                
                 return Response.create_error_response(500, 'Error updating user')
+            
+            return Response.create_response(200, 'User updated')
         
         except Exception as e:
             logger.error(f'Error updating user: {e}')
