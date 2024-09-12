@@ -11,11 +11,11 @@ class UserStorage:
 
     def get(self, id: int) -> User:
         c = self.storage.get_cursor()
-        c.execute('SELECT id, name FROM users WHERE id = ?;', (id,))
+        c.execute('SELECT id, name, enable FROM users WHERE id = ?;', (id,))
         u = None
 
         for row in c.fetchall():
-            u = User(row[1], row[0])
+            u = User(row[1], row[0], row[2])
 
         c.close()
         return u
