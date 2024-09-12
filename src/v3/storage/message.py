@@ -18,7 +18,20 @@ class MessageStorage:
     
     def get(self, id: int) -> Message:
         c = self.db.cursor()
-        c.execute('SELECT id, timestamp, user_id, text FROM messages WHERE id = ?', (id,))
+        c.execute("""
+        SELECT 
+            m.id, 
+            m.timestamp, 
+            m.user_id, 
+            u.name, 
+            m.text 
+        FROM 
+            messages m inner join users u 
+                on m.user_id = u.id
+        WHERE 
+            m.id = ? 
+        """
+            , (id,))
         m = None
 
         for row in c.fetchall():

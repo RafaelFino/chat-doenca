@@ -11,6 +11,10 @@ userModel = api.model('UserModel', {
     'password': fields.String
 })
 
+updateModel = api.model('UpdateModel', {
+    'enable': fields.Boolean
+})
+
 @api.route('/')
 class UserController(Resource):
     @api.expect(userModel)
@@ -64,5 +68,41 @@ class UserIdController(Resource):
         
         except Exception as e:
             logger.error(f'Error getting user: {e}')
+            return Response.create_error_response(500, str(e))
+        
+    @api.expect(updateModel)
+    def put(self, id):
+        try:
+            token = services.auth(request)
+
+            if token is None:
+                return Response.create_error_response(401, 'Unauthorized', 'User or token not found')
+            
+            if token.status is LoginStatus.REJECTED:
+                return Response.create_error_response(403, 'Forbidden', 'Invalid token')
+            
+            if token.status is LoginStatus.EXPIRED:
+                return Response.create_error_response(401, 'Unauthorized', "Token expired")
+            
+            if token.user is None:
+                return Response.create_error_response(401, 'Unauthorized', 'User not found')
+
+            user_id = token.get_user_id()
+            
+            if user_id is None:
+                return Response.create_error_response(401, 'Unauthorized')
+            
+            enable = request.json.get('enable')
+            if enable is None:
+                return Response.create_error_response(400, 'Empty enable')
+            
+            ret = services.user_service().put(id, enable)
+            if ret:
+                return Response.create_response(200, 'User updated')
+            else:
+                return Response.create_error_response(500, 'Error updating user')
+        
+        except Exception as e:
+            logger.error(f'Error updating user: {e}')
             return Response.create_error_response(500, str(e))
         

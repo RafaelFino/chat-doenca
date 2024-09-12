@@ -24,3 +24,13 @@ class UserService:
         
         return None
     
+    def put(self, id: int, enable: bool) -> bool:
+        try:            
+            ret = self.storage.put(id, enable)
+            if ret:
+                logger.info(f'User {id} updated -> enable: {enable}')
+                return True
+        except Exception as e:
+            logger.error(f'Error updating user: {e}')
+        
+        return False
