@@ -14,6 +14,14 @@ class UserService:
             logger.error(f'Error getting user: {e}')
         
         return None
+    
+    def get_all(self) -> list[User]:
+        try:
+            return self.storage.get_all()
+        except Exception as e:
+            logger.error(f'Error getting all users: {e}')
+        
+        return []
 
     def create(self, name: str, password: str) -> int:
         try:

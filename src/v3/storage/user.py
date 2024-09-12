@@ -20,6 +20,21 @@ class UserStorage:
         c.close()
         return u
     
+    def get_all(self) -> list[User]:
+        try:
+            c = self.storage.get_cursor()
+            c.execute('SELECT id, name, enable FROM users;')
+            u = []
+
+            for row in c.fetchall():
+                u.append(User(row[1], row[0], row[2]))
+
+            c.close()
+            return u
+        except Exception as e:
+            logger.error(f'Error getting all users: {e}')
+            return []
+    
     def put(self, id : int, enable: bool) -> bool:
         try:
             c = self.storage.get_cursor()

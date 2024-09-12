@@ -35,6 +35,35 @@ class UserController(Resource):
         except Exception as e:
             logger.error(f'Error creating user: {e}')
             return Response.create_error_response(500, str(e))
+        
+    @api.doc(params={'Authorization': {'in': 'header', 'description': 'Authorization token'}})
+    def get(self):
+        try:
+            token = services.auth(request)
+
+            if token is None:
+                return Response.create_error_response(401, 'Unauthorized', 'User or token not found')
+            
+            if token.status is LoginStatus.REJECTED:
+                return Response.create_error_response(403, 'Forbidden', 'Invalid token')
+            
+            if token.status is LoginStatus.EXPIRED:
+                return Response.create_error_response(401, 'Unauthorized', "Token expired")
+            
+            if token.user is None:
+                return Response.create_error_response(401, 'Unauthorized', 'User not found')
+
+            user_id = token.get_user_id()
+            
+            if user_id is None:
+                return Response.create_error_response(401, 'Unauthorized')
+            
+            users = services.user_service().get_all()
+            return Response.create_response(200, 'Users loaded', { 'users': [u.ToJson() for u in users] })
+        
+        except Exception as e:
+            logger.error(f'Error getting users: {e}')
+            return Response.create_error_response(500, str(e))
 
 @api.route('/<id>')
 @api.doc(params={'Authorization': {'in': 'header', 'description': 'Authorization token'}})
