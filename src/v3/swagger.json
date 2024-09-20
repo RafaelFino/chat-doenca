@@ -1,0 +1,272 @@
+{
+  "swagger": "2.0",
+  "basePath": "/v3",
+  "paths": {
+    "/auth/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_auth_controller",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/AuthModel"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_auth_controller",
+        "parameters": [
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/message/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_message_controller",
+        "parameters": [
+          {
+            "required": false,
+            "in": "query",
+            "description": "Last message id",
+            "name": "last",
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Message"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_message_controller",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/MessageModel"
+            }
+          },
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Message"
+        ]
+      }
+    },
+    "/user/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_controller",
+        "parameters": [
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "post_user_controller",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserModel"
+            }
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "parameters": [
+        {
+          "in": "header",
+          "description": "Authorization token",
+          "name": "Authorization",
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_id_controller",
+        "tags": [
+          "User"
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "put_user_id_controller",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UpdateModel"
+            }
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Chat-Doenca V3",
+    "version": "3.0",
+    "description": "Chat-Doenca API"
+  },
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "User",
+      "description": "User related operations"
+    },
+    {
+      "name": "Auth",
+      "description": "Auth related operations"
+    },
+    {
+      "name": "Message",
+      "description": "Message related operations"
+    }
+  ],
+  "definitions": {
+    "UserModel": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UpdateModel": {
+      "properties": {
+        "enable": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AuthModel": {
+      "properties": {
+        "password": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MessageModel": {
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "responses": {
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    },
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    }
+  },
+  "host": "http://learnops.duckdns.org:7111/"
+}
