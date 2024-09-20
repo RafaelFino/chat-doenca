@@ -4,3 +4,4 @@ flask-cors
 flask-restx
 loguru
 db-sqlite3
+pytermtk
