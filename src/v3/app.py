@@ -1,6 +1,7 @@
 #! /bin/env python3
 import logging
 from os import environ
+import json
 
 from flask import Flask, Blueprint
 from flask_restx import Api
@@ -40,5 +41,11 @@ def index():
 if __name__ == '__main__':
     logger.info('Starting Chat Doenca API')    
     SERVER_HOST = environ.get('SERVER_HOST_CHAT_V3', 'localhost')
+
+    app.config["SERVER_NAME"] = "http://learnops.duckdns.org:7111/"
+    app.app_context().__enter__()
+    with open('swagger.json', 'w') as f:
+        f.write(json.dumps(api.__schema__, indent=2))
+
     app.run(host=SERVER_HOST, port=8082, threaded=True)
     logger.info('Exiting Chat Doenca API')
