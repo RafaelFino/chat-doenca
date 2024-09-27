@@ -42,7 +42,8 @@ if __name__ == '__main__':
     logger.info('Starting Chat Doenca API')    
     SERVER_HOST = environ.get('SERVER_HOST_CHAT_V3', 'localhost')
 
-    app.config["SERVER_NAME"] = "http://learnops.duckdns.org:7111/"
+    #app.config["SERVER_NAME"] = "http://learnops.duckdns.org:7111/"
+    app.config["SERVER_NAME"] = "localhost:8082"
     app.app_context().__enter__()
     with open('swagger.json', 'w') as f:
         f.write(json.dumps(api.__schema__, indent=2))

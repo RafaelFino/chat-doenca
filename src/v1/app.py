@@ -108,7 +108,6 @@ def get_messages(last: int = 0):
             "timestamp": datetime.datetime.now().isoformat()
             }, 500
 
-#if __name__ == '__main__':
 def start_app():
     logger.info('Starting Chat Doenca API')
     from waitress import serve

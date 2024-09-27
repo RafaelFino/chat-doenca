@@ -125,7 +125,9 @@ class UserIdController(Resource):
             if enable is None:
                 return Response.create_error_response(400, 'Empty enable field')
             
-            if not services.user_service().put(id, enable):                
+            logger.info(f'Updating user {id} with enable {enable} -> changed by user {user_id}')
+            
+            if not services.user_service().put(user_id, id, enable):                
                 return Response.create_error_response(500, 'Error updating user')
             
             return Response.create_response(200, 'User updated')

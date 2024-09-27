@@ -8,7 +8,7 @@
         let lastMessageId = 0; // ID da última mensagem recebida
 
         async function fetchMessages() {            
-            let url = `http://server:8081/messages/?last=${lastMessageId}`;
+            let url = `http://0.0.0.0:8081/messages/?last=${lastMessageId}`;
 
             resp = await fetch(url, {
                 method: 'GET',                
@@ -72,7 +72,7 @@
 
             console.log('Enviando mensagem:', sender, text);
 
-            fetch('http://ser:8081/message', {
+            fetch('http://0.0.0.0:8081/message', {
                 method: 'POST',
                 body: formData
             })

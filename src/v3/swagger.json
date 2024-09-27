@@ -11,6 +11,25 @@
           "type": "string"
         }
       ],
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "delete_auth_controller",
+        "parameters": [
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      },
       "post": {
         "responses": {
           "200": {
@@ -31,54 +50,9 @@
         "tags": [
           "Auth"
         ]
-      },
-      "delete": {
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        },
-        "operationId": "delete_auth_controller",
-        "parameters": [
-          {
-            "in": "header",
-            "description": "Authorization token",
-            "name": "Authorization",
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Auth"
-        ]
       }
     },
     "/message/": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        },
-        "operationId": "get_message_controller",
-        "parameters": [
-          {
-            "required": false,
-            "in": "query",
-            "description": "Last message id",
-            "name": "last",
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "description": "Authorization token",
-            "name": "Authorization",
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "Message"
-        ]
-      },
       "post": {
         "responses": {
           "200": {
@@ -105,17 +79,22 @@
         "tags": [
           "Message"
         ]
-      }
-    },
-    "/user/": {
+      },
       "get": {
         "responses": {
           "200": {
             "description": "Success"
           }
         },
-        "operationId": "get_user_controller",
+        "operationId": "get_message_controller",
         "parameters": [
+          {
+            "required": false,
+            "in": "query",
+            "description": "Last message id",
+            "name": "last",
+            "type": "string"
+          },
           {
             "in": "header",
             "description": "Authorization token",
@@ -124,9 +103,11 @@
           }
         ],
         "tags": [
-          "User"
+          "Message"
         ]
-      },
+      }
+    },
+    "/user/": {
       "post": {
         "responses": {
           "200": {
@@ -142,6 +123,25 @@
             "schema": {
               "$ref": "#/definitions/UserModel"
             }
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_controller",
+        "parameters": [
+          {
+            "in": "header",
+            "description": "Authorization token",
+            "name": "Authorization",
+            "type": "string"
           }
         ],
         "tags": [
@@ -164,17 +164,6 @@
           "type": "string"
         }
       ],
-      "get": {
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        },
-        "operationId": "get_user_id_controller",
-        "tags": [
-          "User"
-        ]
-      },
       "put": {
         "responses": {
           "200": {
@@ -192,6 +181,17 @@
             }
           }
         ],
+        "tags": [
+          "User"
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "operationId": "get_user_id_controller",
         "tags": [
           "User"
         ]
@@ -268,5 +268,5 @@
       "description": "When any error occurs on mask"
     }
   },
-  "host": "http://learnops.duckdns.org:7111/"
+  "host": "localhost:8082"
 }

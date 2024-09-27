@@ -32,11 +32,11 @@ class UserService:
         
         return None
     
-    def put(self, id: int, enable: bool) -> bool:
+    def put(self, requester: int, target: int, enable: bool) -> bool:
         try:            
-            ret = self.storage.put(id, enable)
+            ret = self.storage.put(requester, target, enable)
             if ret:
-                logger.info(f'User {id} updated -> enable: {enable}')
+                logger.info(f'User {target} updated by {requester} -> enable: {enable}')
                 return True
         except Exception as e:
             logger.error(f'Error updating user: {e}')
