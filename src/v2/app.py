@@ -111,24 +111,8 @@ def get_message(id: int):
 def get_messages():
     try:
         ret = []        
-        sender = request.args.get('sender')                
         last = request.args.get('last')        
-        logger.info(f"Sender: {sender} // Last: {last}")
-
-        if sender is not None:                      
-            for m in storage.get_messages_from(sender):
-                ret.append(m.ToJson())
-
-            if len(ret) == 0:
-                return resp({
-                    "error": "No messages found"
-                }, 404)
-
-            logger.info(f"Returning {len(ret)} messages from {sender}: {ret}")
-            return resp({
-                "messages": ret
-                }, 200)
-        
+       
         if last is not None:            
             logger.info(f"Last: {last}")
             if not last.isdigit():
